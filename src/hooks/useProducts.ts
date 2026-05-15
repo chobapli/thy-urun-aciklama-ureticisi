@@ -1,65 +1,79 @@
 import { useState, useEffect } from 'react';
+import {
+  collection,
+  onSnapshot,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  serverTimestamp,
+  orderBy,
+  query,
+} from 'firebase/firestore';
+import { db } from '../lib/firebase';
 import type { Product } from '../types';
 
-function uid() {
-  return Math.random().toString(36).slice(2, 9);
-}
+const COL = 'products';
 
 export function useProducts() {
-  const [products, setProducts] = useState<Product[]>(() => {
-    try {
-      const saved = localStorage.getItem('products');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  // Firestore'dan gerçek zamanlı dinle
   useEffect(() => {
-    const timer = setTimeout(() => {
-      localStorage.setItem('products', JSON.stringify(products));
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [products]);
+    const q = query(collection(db, COL), orderBy('createdAt', 'asc'));
+    const unsub = onSnapshot(q, (snap) => {
+      setProducts(
+        snap.docs.map((d) => ({ id: d.id, ...d.data() } as Product))
+      );
+      setLoading(false);
+    });
+    return unsub;
+  }, []);
 
-  const addProduct = (data: Omit<Product, 'id' | 'status' | 'descTR' | 'descEN'>) => {
-    const product: Product = {
+  const addProduct = async (data: Omit<Product, 'id' | 'status' | 'descTR' | 'descEN'>) => {
+    const docRef = await addDoc(collection(db, COL), {
       ...data,
-      id: uid(),
       status: 'pending',
       descTR: '',
       descEN: '',
-    };
-    setProducts((prev) => [...prev, product]);
+      createdAt: serverTimestamp(),
+    });
+    // Yerel state için geçici id — onSnapshot zaten güncelleyecek
+    const product: Product = { id: docRef.id, ...data, status: 'pending', descTR: '', descEN: '' };
     return product;
   };
 
-  const addProducts = (items: Partial<Product>[]) => {
-    const newProducts: Product[] = items
-      .filter((item) => item.name)
-      .map((item) => ({
-        id: uid(),
-        code: item.code || '',
-        name: item.name || '',
-        catId: item.catId || '',
-        subId: item.subId || '',
-        imageUrl: item.imageUrl || '',
-        status: 'pending' as const,
-        descTR: '',
-        descEN: '',
-      }));
-    setProducts((prev) => [...prev, ...newProducts]);
-  };
-
-  const updateProduct = (id: string, updates: Partial<Product>) => {
-    setProducts((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, ...updates } : p))
+  const addProducts = async (items: Partial<Product>[]) => {
+    const valids = items.filter((item) => item.name);
+    await Promise.all(
+      valids.map((item) =>
+        addDoc(collection(db, COL), {
+          code: item.code || '',
+          name: item.name || '',
+          catId: item.catId || '',
+          subId: item.subId || '',
+          imageUrl: item.imageUrl || '',
+          status: 'pending',
+          descTR: '',
+          descEN: '',
+          createdAt: serverTimestamp(),
+        })
+      )
     );
   };
 
-  const deleteProduct = (id: string) => {
-    setProducts((prev) => prev.filter((p) => p.id !== id));
+  const updateProduct = async (id: string, updates: Partial<Product>) => {
+    // Anlık UI güncellemesi (optimistic)
+    setProducts((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, ...updates } : p))
+    );
+    await updateDoc(doc(db, COL, id), updates);
   };
 
-  return { products, addProduct, addProducts, updateProduct, deleteProduct };
+  const deleteProduct = async (id: string) => {
+    await deleteDoc(doc(db, COL, id));
+  };
+
+  return { products, loading, addProduct, addProducts, updateProduct, deleteProduct };
 }

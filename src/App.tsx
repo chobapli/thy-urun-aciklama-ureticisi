@@ -18,7 +18,7 @@ function uid() {
 }
 
 export default function App() {
-  const { products, addProduct, addProducts, updateProduct, deleteProduct } = useProducts();
+  const { products, loading, addProduct, addProducts, updateProduct, deleteProduct } = useProducts();
   const {
     categories,
     addCategory,
@@ -79,12 +79,12 @@ export default function App() {
           categories={categories}
           products={products}
           batchRunning={batchRunning}
-          onAddProduct={(data) => {
-            addProduct(data);
+          onAddProduct={async (data) => {
+            await addProduct(data);
             addToast('Ürün eklendi', 'success');
           }}
-          onAddProducts={(items) => {
-            addProducts(items);
+          onAddProducts={async (items) => {
+            await addProducts(items);
             addToast(`${items.length} ürün CSV'den eklendi`, 'success');
           }}
           onBatchGenerate={generateBatch}
@@ -100,6 +100,11 @@ export default function App() {
         />
 
         <main className="flex-1 overflow-y-auto p-6">
+          {loading && (
+            <div className="flex items-center justify-center h-40 text-text-secondary text-sm">
+              Veriler yükleniyor...
+            </div>
+          )}
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-text-main text-xl font-bold">Ürün Açıklamaları</h1>
