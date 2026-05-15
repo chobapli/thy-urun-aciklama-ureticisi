@@ -33,7 +33,8 @@ export function ProductTable({ products, categories, onEdit, onDelete }: Product
             <th className="text-left text-text-secondary font-medium px-4 py-3">Ürün</th>
             <th className="text-left text-text-secondary font-medium px-4 py-3">Kategori</th>
             <th className="text-left text-text-secondary font-medium px-4 py-3">Durum</th>
-            <th className="text-left text-text-secondary font-medium px-4 py-3">Açıklama Önizleme</th>
+            <th className="text-left text-text-secondary font-medium px-4 py-3">Türkçe Açıklama</th>
+            <th className="text-left text-text-secondary font-medium px-4 py-3">İngilizce Açıklama</th>
             <th className="text-right text-text-secondary font-medium px-4 py-3">İşlem</th>
           </tr>
         </thead>
@@ -81,11 +82,17 @@ export function ProductTable({ products, categories, onEdit, onDelete }: Product
               <td className="px-4 py-3">
                 <StatusDot status={product.status} />
               </td>
-              {/* Önizleme */}
-              <td className="px-4 py-3 max-w-xs">
-                <span className="text-text-secondary text-xs line-clamp-2">
-                  {product.descTR ? product.descTR.slice(0, 80) + (product.descTR.length > 80 ? '…' : '') : '—'}
-                </span>
+              {/* TR Açıklama */}
+              <td className="px-4 py-3" style={{ maxWidth: '320px' }}>
+                <p className="text-text-secondary text-xs leading-relaxed whitespace-normal">
+                  {product.descTR || '—'}
+                </p>
+              </td>
+              {/* EN Açıklama */}
+              <td className="px-4 py-3" style={{ maxWidth: '320px' }}>
+                <p className="text-text-secondary text-xs leading-relaxed whitespace-normal">
+                  {product.descEN || '—'}
+                </p>
               </td>
               {/* İşlem */}
               <td className="px-4 py-3 text-right">
