@@ -1,7 +1,5 @@
 import type { Category } from './types';
 
-export const SHEET_ID = '1kdgiVjGtQgqkAecx-tFoWggnR9tQ4veXWp72_K9E_Ho';
-
 export const DEFAULT_CATS: Category[] = [
   {
     id: 'cat-1', name: 'Havacılık',

@@ -3,7 +3,6 @@ import { Header } from './components/Layout/Header';
 import { Sidebar } from './components/Layout/Sidebar';
 import { StatsBar } from './components/Main/StatsBar';
 import { BatchProgress } from './components/Main/BatchProgress';
-import { GoogleAuthBanner } from './components/Main/GoogleAuthBanner';
 import { ProductTable } from './components/Main/ProductTable';
 import { SearchBar } from './components/Main/SearchBar';
 import { ProductModal } from './components/Modals/ProductModal';
@@ -11,7 +10,6 @@ import { ToastContainer } from './components/UI/Toast';
 import { useProducts } from './hooks/useProducts';
 import { useCategories } from './hooks/useCategories';
 import { useGenerate } from './hooks/useGenerate';
-import { useGoogle } from './hooks/useGoogle';
 import { exportCSV } from './lib/csv';
 import type { Product, ToastMessage } from './types';
 
@@ -35,8 +33,6 @@ export default function App() {
     categories,
     updateProduct
   );
-  const { token, userEmail, exporting, connect, disconnect, doExport } = useGoogle();
-
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [search, setSearch] = useState('');
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -69,24 +65,6 @@ export default function App() {
     const updated = products.find((p) => p.id === product.id);
     if (updated) setEditingProduct({ ...updated });
     addToast('Açıklama üretildi', 'success');
-  };
-
-  const handleSheetExport = async () => {
-    try {
-      await doExport(products, categories);
-      addToast(`${products.filter((p) => p.status === 'done').length} ürün Google Sheets'e aktarıldı`, 'success');
-    } catch (e: unknown) {
-      addToast(e instanceof Error ? e.message : 'Export hatası', 'error');
-    }
-  };
-
-  const handleGoogleConnect = async () => {
-    try {
-      await connect();
-      addToast('Google hesabına bağlanıldı', 'success');
-    } catch {
-      addToast('Google bağlantısı başarısız', 'error');
-    }
   };
 
   return (
@@ -136,22 +114,8 @@ export default function App() {
               >
                 📥 CSV İndir
               </button>
-              <button
-                onClick={handleSheetExport}
-                disabled={!token || exporting}
-                className="bg-[#222] border border-border text-text-secondary hover:text-text-main text-sm px-4 py-2 rounded-lg transition-colors disabled:opacity-40"
-              >
-                {exporting ? '⏳ Aktarılıyor...' : "📊 Sheets'e Aktar"}
-              </button>
             </div>
           </div>
-
-          <GoogleAuthBanner
-            token={token}
-            userEmail={userEmail}
-            onConnect={handleGoogleConnect}
-            onDisconnect={disconnect}
-          />
 
           <StatsBar products={products} />
 
