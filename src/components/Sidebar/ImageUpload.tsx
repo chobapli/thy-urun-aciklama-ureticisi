@@ -1,4 +1,6 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '../../lib/firebase';
 
 interface ImageUploadProps {
   imageUrl: string;
@@ -7,15 +9,22 @@ interface ImageUploadProps {
 
 export function ImageUpload({ imageUrl, onImageChange }: ImageUploadProps) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const isBase64 = imageUrl.startsWith('data:');
+  const [uploading, setUploading] = useState(false);
   const isUrl = imageUrl.startsWith('http');
 
-  const handleFile = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      onImageChange(e.target?.result as string);
-    };
-    reader.readAsDataURL(file);
+  const handleFile = async (file: File) => {
+    setUploading(true);
+    try {
+      const path = `products/${Date.now()}_${file.name}`;
+      const storageRef = ref(storage, path);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      onImageChange(url);
+    } catch {
+      alert('Görsel yüklenemedi. Lütfen tekrar deneyin.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -23,7 +32,7 @@ export function ImageUpload({ imageUrl, onImageChange }: ImageUploadProps) {
       <label className="text-text-secondary text-xs font-medium uppercase tracking-wide">Görsel</label>
 
       {imageUrl ? (
-        <div className="relative inline-block">
+        <div className="relative inline-block w-full">
           <img
             src={imageUrl}
             alt="Preview"
@@ -37,21 +46,16 @@ export function ImageUpload({ imageUrl, onImageChange }: ImageUploadProps) {
           >
             ×
           </button>
-          {isBase64 && (
-            <span className="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-1 rounded">
-              Yüklendi
-            </span>
-          )}
         </div>
       ) : (
         <div className="space-y-2">
-          {/* Dosya yükle */}
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="w-full border border-dashed border-border rounded-lg py-3 text-text-secondary text-sm hover:border-[#444] hover:text-text-main transition-colors"
+            disabled={uploading}
+            className="w-full border border-dashed border-border rounded-lg py-3 text-text-secondary text-sm hover:border-[#444] hover:text-text-main transition-colors disabled:opacity-50"
           >
-            📁 Bilgisayardan Yükle
+            {uploading ? '⏳ Yükleniyor...' : '📁 Bilgisayardan Yükle'}
           </button>
           <input
             ref={fileRef}
@@ -64,8 +68,7 @@ export function ImageUpload({ imageUrl, onImageChange }: ImageUploadProps) {
             }}
           />
 
-          {/* URL gir */}
-          {!isBase64 && (
+          {!isUrl && (
             <input
               type="text"
               placeholder="veya görsel URL girin..."
