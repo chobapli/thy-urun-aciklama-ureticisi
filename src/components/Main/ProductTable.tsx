@@ -26,8 +26,8 @@ export function ProductTable({ products, categories, onEdit, onDelete }: Product
   }
 
   return (
-    <div className="bg-sidebar border border-border rounded-lg overflow-hidden">
-      <table className="w-full text-sm">
+    <div className="bg-sidebar border border-border rounded-lg overflow-x-auto">
+      <table className="w-full text-sm min-w-[900px]">
         <thead>
           <tr className="border-b border-border">
             <th className="text-left text-text-secondary font-medium px-4 py-3">Ürün</th>
