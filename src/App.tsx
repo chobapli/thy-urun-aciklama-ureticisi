@@ -70,11 +70,11 @@ export default function App() {
   return (
     <div
       style={{ backgroundColor: '#0D0D0D', color: '#FAFAF8', fontFamily: 'system-ui, sans-serif' }}
-      className="min-h-screen flex flex-col"
+      className="h-screen flex flex-col overflow-hidden"
     >
       <Header />
 
-      <div className="flex flex-1 overflow-hidden" style={{ height: 'calc(100vh - 56px)' }}>
+      <div className="flex flex-1 min-h-0">
         <Sidebar
           categories={categories}
           products={products}
