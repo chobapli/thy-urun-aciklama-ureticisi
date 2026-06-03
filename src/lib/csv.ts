@@ -24,7 +24,7 @@ export function parseCSV(text: string, categories: Category[]): Partial<Product>
       name: adIdx >= 0 ? cols[adIdx] : '',
       catId: cat?.id || '',
       subId: sub?.id || '',
-      imageUrl: imgIdx >= 0 ? cols[imgIdx] : '',
+      imageUrls: imgIdx >= 0 && cols[imgIdx] ? [cols[imgIdx]] : [],
       status: 'pending' as const,
       descTR: '',
       descEN: '',
@@ -40,7 +40,7 @@ export function exportCSV(products: Product[], categories: Category[]): void {
 
   const header = 'Ürün Kodu,Kategori,Alt Kategori,Ürün Adı,Açıklama (TR),Açıklama (EN),Görsel URL,Durum';
   const rows = products.map((p) => {
-    const imgVal = p.imageUrl.startsWith('data:') ? '[Yüklenen Görsel]' : p.imageUrl;
+    const imgVal = (p.imageUrls ?? []).join(';');
     return [
       p.code,
       getCatName(p.catId),

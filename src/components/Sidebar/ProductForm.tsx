@@ -13,17 +13,17 @@ export function ProductForm({ categories, onAdd }: ProductFormProps) {
   const [catId, setCatId] = useState('');
   const [subId, setSubId] = useState('');
   const [name, setName] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
 
   const selectedCat = categories.find((c) => c.id === catId);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-    onAdd({ code, catId, subId, name, imageUrl });
+    onAdd({ code, catId, subId, name, imageUrls });
     setCode('');
     setName('');
-    setImageUrl('');
+    setImageUrls([]);
   };
 
   return (
@@ -89,7 +89,7 @@ export function ProductForm({ categories, onAdd }: ProductFormProps) {
         />
       </div>
 
-      <ImageUpload imageUrl={imageUrl} onImageChange={setImageUrl} />
+      <ImageUpload imageUrls={imageUrls} onImagesChange={setImageUrls} />
 
       <Button type="submit" variant="primary" className="w-full">
         + Ürün Ekle

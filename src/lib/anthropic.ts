@@ -11,7 +11,7 @@ export async function generateDescriptions(
   categoryName: string,
   subcategoryName: string,
   productCode: string,
-  imageUrl?: string
+  imageUrls?: string[]
 ): Promise<{ tr: string; en: string }> {
   const textContent = {
     type: 'text' as const,
@@ -23,11 +23,13 @@ Product Code: ${productCode}
 Write product descriptions in BOTH Turkish and English for the Turkish Airlines official merchandise store.`,
   };
 
-  const content = imageUrl
-    ? [
-        { type: 'image' as const, source: { type: 'url' as const, url: imageUrl } },
-        textContent,
-      ]
+  const imageBlocks = (imageUrls ?? []).map((url) => ({
+    type: 'image' as const,
+    source: { type: 'url' as const, url },
+  }));
+
+  const content = imageBlocks.length > 0
+    ? [...imageBlocks, textContent]
     : [textContent];
 
   const response = await client.messages.create({

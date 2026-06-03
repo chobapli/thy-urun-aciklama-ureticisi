@@ -24,7 +24,14 @@ export function useProducts() {
     const q = query(collection(db, COL), orderBy('createdAt', 'asc'));
     const unsub = onSnapshot(q, (snap) => {
       setProducts(
-        snap.docs.map((d) => ({ id: d.id, ...d.data() } as Product))
+        snap.docs.map((d) => {
+          const data = d.data();
+          // Eski imageUrl alanını imageUrls dizisine migrate et
+          if (!data.imageUrls) {
+            data.imageUrls = data.imageUrl ? [data.imageUrl] : [];
+          }
+          return { id: d.id, ...data } as Product;
+        })
       );
       setLoading(false);
     });
@@ -53,7 +60,7 @@ export function useProducts() {
           name: item.name || '',
           catId: item.catId || '',
           subId: item.subId || '',
-          imageUrl: item.imageUrl || '',
+          imageUrls: item.imageUrls || [],
           status: 'pending',
           descTR: '',
           descEN: '',

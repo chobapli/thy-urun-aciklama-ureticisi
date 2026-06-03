@@ -45,13 +45,28 @@ export function ProductModal({ product, categories, onSave, onGenerate, onClose 
         {/* Header */}
         <div className="border-b border-border px-6 py-4">
           <div className="flex items-start justify-between">
-            <div>
-              <h2 className="text-text-main font-bold text-lg">{product.name}</h2>
-              <p className="text-text-secondary text-xs mt-1 font-mono">
-                {product.code}
-                {catName && ` • ${catName}`}
-                {subName && ` › ${subName}`}
-              </p>
+            <div className="flex items-start gap-3 flex-1">
+              {product.imageUrls?.length > 0 && (
+                <div className="flex gap-1.5 shrink-0">
+                  {product.imageUrls.slice(0, 4).map((url, idx) => (
+                    <img
+                      key={idx}
+                      src={url}
+                      alt={`Görsel ${idx + 1}`}
+                      className="w-12 h-12 rounded-lg object-cover border border-border"
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    />
+                  ))}
+                </div>
+              )}
+              <div>
+                <h2 className="text-text-main font-bold text-lg">{product.name}</h2>
+                <p className="text-text-secondary text-xs mt-1 font-mono">
+                  {product.code}
+                  {catName && ` • ${catName}`}
+                  {subName && ` › ${subName}`}
+                </p>
+              </div>
             </div>
             <button
               onClick={onClose}

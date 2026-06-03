@@ -49,18 +49,27 @@ export function ProductTable({ products, categories, onEdit, onDelete }: Product
               {/* Ürün */}
               <td className="px-4 py-3">
                 <div className="flex items-center gap-3">
-                  {product.imageUrl ? (
-                    <img
-                      src={product.imageUrl}
-                      alt={product.name}
-                      className="w-9 h-9 rounded object-cover border border-border shrink-0"
-                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                    />
-                  ) : (
-                    <div className="w-9 h-9 rounded bg-border shrink-0 flex items-center justify-center text-text-secondary text-xs">
-                      📦
-                    </div>
-                  )}
+                  <div className="shrink-0 flex gap-1">
+                    {product.imageUrls?.length > 0 ? (
+                      <>
+                        <img
+                          src={product.imageUrls[0]}
+                          alt={product.name}
+                          className="w-9 h-9 rounded object-cover border border-border"
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                        />
+                        {product.imageUrls.length > 1 && (
+                          <span className="w-9 h-9 rounded bg-border flex items-center justify-center text-text-secondary text-xs font-medium">
+                            +{product.imageUrls.length - 1}
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <div className="w-9 h-9 rounded bg-border flex items-center justify-center text-text-secondary text-xs">
+                        📦
+                      </div>
+                    )}
+                  </div>
                   <div>
                     <div className="text-text-main font-medium leading-tight">{product.name}</div>
                     <div className="text-text-secondary font-mono text-xs mt-0.5">{product.code}</div>
