@@ -11,14 +11,19 @@ export async function generateDescriptions(
   categoryName: string,
   subcategoryName: string,
   productCode: string,
-  imageUrls?: string[]
+  imageUrls?: string[],
+  extraInfo?: string
 ): Promise<{ tr: string; en: string }> {
+  const extraLine = extraInfo?.trim()
+    ? `\nExtra context (use this to guide the description): ${extraInfo.trim()}`
+    : '';
+
   const textContent = {
     type: 'text' as const,
     text: `Product Name: ${productName}
 Category: ${categoryName}
 Subcategory: ${subcategoryName}
-Product Code: ${productCode}
+Product Code: ${productCode}${extraLine}
 
 Write product descriptions in BOTH Turkish and English for the Turkish Airlines official merchandise store.`,
   };

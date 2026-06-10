@@ -14,6 +14,7 @@ export function ProductModal({ product, categories, onSave, onGenerate, onClose 
   const [lang, setLang] = useState<'tr' | 'en'>('tr');
   const [descTR, setDescTR] = useState(product.descTR);
   const [descEN, setDescEN] = useState(product.descEN);
+  const [extraInfo, setExtraInfo] = useState(product.extraInfo ?? '');
   const [generating, setGenerating] = useState(false);
 
   const catName = categories.find((c) => c.id === product.catId)?.name || '';
@@ -21,17 +22,17 @@ export function ProductModal({ product, categories, onSave, onGenerate, onClose 
 
   const handleGenerate = async () => {
     setGenerating(true);
+    const extra = extraInfo.trim() || undefined;
     try {
-      await onGenerate({ ...product, descTR, descEN });
-      // Üretim tamamlandığında parent state'ten güncel değerleri al
-      onSave({ descTR, descEN });
+      await onGenerate({ ...product, descTR, descEN, extraInfo: extra });
+      onSave({ descTR, descEN, extraInfo: extra });
     } finally {
       setGenerating(false);
     }
   };
 
   const handleSave = () => {
-    onSave({ descTR, descEN });
+    onSave({ descTR, descEN, extraInfo: extraInfo.trim() || undefined });
     onClose();
   };
 
@@ -102,7 +103,21 @@ export function ProductModal({ product, categories, onSave, onGenerate, onClose 
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-6 space-y-4">
+          <div>
+            <label className="text-text-secondary text-xs font-medium uppercase tracking-wide block mb-1">
+              Ekstra Bilgi <span className="text-text-secondary font-normal normal-case">(opsiyonel)</span>
+            </label>
+            <textarea
+              value={extraInfo}
+              onChange={(e) => setExtraInfo(e.target.value)}
+              placeholder="Açıklamayı yönlendirmek için ek bağlam..."
+              rows={2}
+              className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-main text-sm resize-none focus:outline-none focus:border-[#444] placeholder:text-text-secondary"
+            />
+          </div>
+
+          <div>
           {lang === 'tr' ? (
             <textarea
               value={descTR}
@@ -120,6 +135,7 @@ export function ProductModal({ product, categories, onSave, onGenerate, onClose 
               className="w-full bg-bg border border-border rounded-lg px-4 py-3 text-text-main text-sm resize-none focus:outline-none focus:border-[#444] placeholder:text-text-secondary"
             />
           )}
+          </div>
         </div>
 
         {/* Footer */}

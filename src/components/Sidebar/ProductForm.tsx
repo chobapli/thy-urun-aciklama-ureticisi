@@ -14,16 +14,18 @@ export function ProductForm({ categories, onAdd }: ProductFormProps) {
   const [subId, setSubId] = useState('');
   const [name, setName] = useState('');
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [extraInfo, setExtraInfo] = useState('');
 
   const selectedCat = categories.find((c) => c.id === catId);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-    onAdd({ code, catId, subId, name, imageUrls });
+    onAdd({ code, catId, subId, name, imageUrls, extraInfo: extraInfo.trim() || undefined });
     setCode('');
     setName('');
     setImageUrls([]);
+    setExtraInfo('');
   };
 
   return (
@@ -90,6 +92,19 @@ export function ProductForm({ categories, onAdd }: ProductFormProps) {
       </div>
 
       <ImageUpload imageUrls={imageUrls} onImagesChange={setImageUrls} />
+
+      <div>
+        <label className="text-text-secondary text-xs font-medium uppercase tracking-wide block mb-1">
+          Ekstra Bilgi <span className="text-text-secondary font-normal normal-case">(opsiyonel)</span>
+        </label>
+        <textarea
+          value={extraInfo}
+          onChange={(e) => setExtraInfo(e.target.value)}
+          placeholder="Açıklamayı yönlendirmek için ek bağlam..."
+          rows={2}
+          className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text-main placeholder:text-text-secondary focus:outline-none focus:border-[#444] resize-none"
+        />
+      </div>
 
       <Button type="submit" variant="primary" className="w-full">
         + Ürün Ekle

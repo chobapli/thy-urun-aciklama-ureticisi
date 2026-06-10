@@ -16,6 +16,7 @@ export interface Product {
   subId: string;
   name: string;
   imageUrls: string[];
+  extraInfo?: string;
   status: 'pending' | 'generating' | 'done' | 'error';
   descTR: string;
   descEN: string;
