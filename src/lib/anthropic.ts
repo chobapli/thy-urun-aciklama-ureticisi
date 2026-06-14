@@ -6,31 +6,45 @@ const client = new Anthropic({
   dangerouslyAllowBrowser: true,
 });
 
+// Lone surrogate'ları temizler — bunlar JSON UTF-8 encoding'ini kırar
+function clean(s: string): string {
+  return s.replace(/[\uD800-\uDFFF]/g, (ch, i, str) => {
+    const c = ch.charCodeAt(0);
+    if (c <= 0xDBFF && str.charCodeAt(i + 1) >= 0xDC00) return ch;
+    if (c >= 0xDC00 && i > 0 && str.charCodeAt(i - 1) <= 0xDBFF) return ch;
+    return '';
+  });
+}
+
 export async function generateDescriptions(
   productName: string,
   categoryName: string,
   subcategoryName: string,
   productCode: string,
   imageUrls?: string[],
-  extraInfo?: string
+  extraInfo?: string,
+  techSpecs?: string
 ): Promise<{ tr: string; en: string }> {
   const extraLine = extraInfo?.trim()
-    ? `\nExtra context (use this to guide the description): ${extraInfo.trim()}`
+    ? `\nExtra context (use this to guide the description): ${clean(extraInfo.trim())}`
+    : '';
+  const techLine = techSpecs?.trim()
+    ? `\nTechnical Specifications (weave naturally into the text): ${clean(techSpecs.trim())}`
     : '';
 
   const textContent = {
     type: 'text' as const,
-    text: `Product Name: ${productName}
-Category: ${categoryName}
-Subcategory: ${subcategoryName}
-Product Code: ${productCode}${extraLine}
+    text: `Product Name: ${clean(productName)}
+Category: ${clean(categoryName)}
+Subcategory: ${clean(subcategoryName)}
+Product Code: ${clean(productCode)}${extraLine}${techLine}
 
 Write product descriptions in BOTH Turkish and English for the Turkish Airlines official merchandise store.`,
   };
 
-  const imageBlocks = (imageUrls ?? []).map((url) => ({
+  const imageBlocks = (imageUrls ?? []).filter(Boolean).map((url) => ({
     type: 'image' as const,
-    source: { type: 'url' as const, url },
+    source: { type: 'url' as const, url: clean(url) },
   }));
 
   const content = imageBlocks.length > 0

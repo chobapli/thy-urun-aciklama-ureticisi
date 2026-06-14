@@ -39,8 +39,11 @@ export function useProducts() {
   }, []);
 
   const addProduct = async (data: Omit<Product, 'id' | 'status' | 'descTR' | 'descEN'>) => {
+    const { extraInfo, techSpecs, ...rest } = data;
     const docRef = await addDoc(collection(db, COL), {
-      ...data,
+      ...rest,
+      ...(extraInfo !== undefined ? { extraInfo } : {}),
+      ...(techSpecs !== undefined ? { techSpecs } : {}),
       status: 'pending',
       descTR: '',
       descEN: '',

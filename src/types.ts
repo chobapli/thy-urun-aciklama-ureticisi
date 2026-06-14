@@ -17,6 +17,7 @@ export interface Product {
   name: string;
   imageUrls: string[];
   extraInfo?: string;
+  techSpecs?: string;
   status: 'pending' | 'generating' | 'done' | 'error';
   descTR: string;
   descEN: string;

@@ -7,9 +7,11 @@ import { ProductTable } from './components/Main/ProductTable';
 import { SearchBar } from './components/Main/SearchBar';
 import { ProductModal } from './components/Modals/ProductModal';
 import { ToastContainer } from './components/UI/Toast';
+import { LoginPage } from './components/Auth/LoginPage';
 import { useProducts } from './hooks/useProducts';
 import { useCategories } from './hooks/useCategories';
 import { useGenerate } from './hooks/useGenerate';
+import { useAuth } from './hooks/useAuth';
 import { exportCSV } from './lib/csv';
 import type { Product, ToastMessage } from './types';
 
@@ -18,6 +20,7 @@ function uid() {
 }
 
 export default function App() {
+  const { user, loading: authLoading, error: authError, login, logout } = useAuth();
   const { products, loading, addProduct, addProducts, updateProduct, deleteProduct } = useProducts();
   const {
     categories,
@@ -67,12 +70,27 @@ export default function App() {
     addToast('Açıklama üretildi', 'success');
   };
 
+  if (authLoading) {
+    return (
+      <div
+        className="h-screen flex items-center justify-center"
+        style={{ backgroundColor: '#0D0D0D', color: '#FAFAF8' }}
+      >
+        <span className="text-sm" style={{ color: '#6b6b6b' }}>Yükleniyor...</span>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LoginPage onLogin={login} error={authError} />;
+  }
+
   return (
     <div
       style={{ backgroundColor: '#0D0D0D', color: '#FAFAF8', fontFamily: 'system-ui, sans-serif' }}
       className="h-screen flex flex-col overflow-hidden"
     >
-      <Header />
+      <Header onLogout={logout} />
 
       <div className="flex flex-1 min-h-0">
         <Sidebar
@@ -80,12 +98,20 @@ export default function App() {
           products={products}
           batchRunning={batchRunning}
           onAddProduct={async (data) => {
-            await addProduct(data);
-            addToast('Ürün eklendi', 'success');
+            try {
+              await addProduct(data);
+              addToast('Ürün eklendi', 'success');
+            } catch (e) {
+              addToast('Ürün eklenemedi: ' + (e instanceof Error ? e.message : String(e)), 'error');
+            }
           }}
           onAddProducts={async (items) => {
-            await addProducts(items);
-            addToast(`${items.length} ürün CSV'den eklendi`, 'success');
+            try {
+              await addProducts(items);
+              addToast(`${items.length} ürün CSV'den eklendi`, 'success');
+            } catch (e) {
+              addToast('Ürünler eklenemedi: ' + (e instanceof Error ? e.message : String(e)), 'error');
+            }
           }}
           onBatchGenerate={generateBatch}
           onBatchCancel={cancelBatch}

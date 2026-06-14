@@ -15,17 +15,19 @@ export function ProductForm({ categories, onAdd }: ProductFormProps) {
   const [name, setName] = useState('');
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [extraInfo, setExtraInfo] = useState('');
+  const [techSpecs, setTechSpecs] = useState('');
 
   const selectedCat = categories.find((c) => c.id === catId);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-    onAdd({ code, catId, subId, name, imageUrls, extraInfo: extraInfo.trim() || undefined });
+    onAdd({ code, catId, subId, name, imageUrls, extraInfo: extraInfo.trim() || undefined, techSpecs: techSpecs.trim() || undefined });
     setCode('');
     setName('');
     setImageUrls([]);
     setExtraInfo('');
+    setTechSpecs('');
   };
 
   return (
@@ -101,6 +103,19 @@ export function ProductForm({ categories, onAdd }: ProductFormProps) {
           value={extraInfo}
           onChange={(e) => setExtraInfo(e.target.value)}
           placeholder="Açıklamayı yönlendirmek için ek bağlam..."
+          rows={2}
+          className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text-main placeholder:text-text-secondary focus:outline-none focus:border-[#444] resize-none"
+        />
+      </div>
+
+      <div>
+        <label className="text-text-secondary text-xs font-medium uppercase tracking-wide block mb-1">
+          Teknik Özellikler <span className="text-text-secondary font-normal normal-case">(opsiyonel)</span>
+        </label>
+        <textarea
+          value={techSpecs}
+          onChange={(e) => setTechSpecs(e.target.value)}
+          placeholder="Malzeme, boyut, ağırlık, kapasite..."
           rows={2}
           className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text-main placeholder:text-text-secondary focus:outline-none focus:border-[#444] resize-none"
         />

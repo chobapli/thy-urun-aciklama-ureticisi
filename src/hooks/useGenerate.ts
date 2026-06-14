@@ -29,7 +29,8 @@ export function useGenerate(
         getSubName(product.catId, product.subId),
         product.code,
         product.imageUrls?.length ? product.imageUrls : undefined,
-        product.extraInfo
+        product.extraInfo,
+        product.techSpecs
       );
       updateProduct(product.id, { status: 'done', descTR: result.tr, descEN: result.en });
     } catch {
