@@ -33,7 +33,8 @@ export function useGenerate(
         product.techSpecs
       );
       updateProduct(product.id, { status: 'done', descTR: result.tr, descEN: result.en });
-    } catch {
+    } catch (e) {
+      console.error(`"${product.name}" için üretim başarısız:`, e);
       updateProduct(product.id, { status: 'error' });
     }
   };

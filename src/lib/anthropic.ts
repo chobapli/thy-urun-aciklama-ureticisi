@@ -51,12 +51,24 @@ Write product descriptions in BOTH Turkish and English for the Turkish Airlines 
     ? [...imageBlocks, textContent]
     : [textContent];
 
-  const response = await client.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 1000,
-    system: THY_SYSTEM_PROMPT,
-    messages: [{ role: 'user', content }],
-  });
+  let response;
+  try {
+    response = await client.messages.create({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1000,
+      system: THY_SYSTEM_PROMPT,
+      messages: [{ role: 'user', content }],
+    });
+  } catch (err) {
+    // Anthropic API hatalarında (özellikle 400) gerçek mesajı yüzeye çıkar
+    if (err instanceof Anthropic.APIError) {
+      const body = err.error as { error?: { message?: string } } | undefined;
+      const detail = body?.error?.message ?? err.message;
+      console.error('Anthropic API hatası:', err.status, detail, err);
+      throw new Error(`Anthropic ${err.status}: ${detail}`, { cause: err });
+    }
+    throw err;
+  }
 
   const text = response.content[0].type === 'text' ? response.content[0].text : '';
 
