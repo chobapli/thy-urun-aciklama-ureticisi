@@ -18,7 +18,7 @@ npm run preview   # dist/ önizleme
 npm run build && firebase deploy --only hosting
 ```
 
-Test yok. `firebase.json` hosting dışında `firestore` ve `storage` kurallarını da içerir (`firebase deploy --only firestore:rules,storage`).
+Test yok. `firebase.json` hosting dışında `firestore` ve `storage` kurallarını da içerir (`firebase deploy --only firestore:rules,storage`). Repoda ayrıca bir `vercel.json` (Vite build → `dist/`) bulunur; birincil hosting Firebase'dir.
 
 ## Ortam Değişkenleri (.env)
 
@@ -34,19 +34,19 @@ Diğer Firebase config değerleri (`projectId: tk-store-icerik`, appId, authDoma
 ### Veri Akışı
 
 - **Ürünler** → Firestore `products` koleksiyonu (gerçek zamanlı `onSnapshot`, `createdAt` sıralı). Eski belgelerde tekil `imageUrl` alanı varsa `useProducts` bunu `imageUrls: [imageUrl]` dizisine migrate eder.
-- **Kategoriler** → `localStorage` (`categories` anahtarı), `DEFAULT_CATS` varsayılanı ile (`src/constants.ts`). ID formatı `cat-XXXXXXX` / `sub-XXXXXXX`, `uid()` ile üretilir.
+- **Kategoriler** → `localStorage` (`categories` anahtarı), `DEFAULT_CATS` varsayılanı ile (`src/constants.ts`). Varsayılan ID'ler `cat-1` / `sub-1-1` biçiminde; sonradan eklenenler `cat-XXXXXXX` / `sub-XXXXXXX` (`uid()` ile). **Önemli:** Ürünler Firestore'da `catId`/`subId` ile kategoriye referans verir ama kategoriler tarayıcıya özeldir — başka tarayıcıda/cihazda özel kategoriler bulunmaz ve ad çözümlemesi `'Genel'`e (üretimde) ya da boş stringe (CSV export) düşer.
 - **Görseller** → Firebase Storage (`products/` yolu), base64 değil. Yüklemede public URL alınır.
 - **Açıklama üretimi** → Anthropic API doğrudan tarayıcıdan (`dangerouslyAllowBrowser: true`).
 - **Auth** → Firebase Auth email/şifre. `useAuth` içinde `USERNAME_MAP` kullanıcı adını sabit bir email'e çevirir (şifre kodda yok). Kullanıcı yoksa `App` sadece `LoginPage` render eder.
 
-> Firestore ve Storage kuralları şu an `allow read, write: if true` — herkese açık. Auth yalnızca UI seviyesinde koruma sağlar.
+> Firestore ve Storage kuralları şu an `allow read, write: if true` — herkese açık (yalnızca `products` koleksiyonu / `products/` yolu tanımlı; başka yol eklenirse kural da eklenmeli). Auth yalnızca UI seviyesinde koruma sağlar.
 
 ### Hook'lar
 
 | Hook | Sorumluluk |
 |------|-----------|
 | `useAuth` | Firebase Auth durum takibi, `login(username, password)` / `logout` |
-| `useProducts` | Firestore CRUD, optimistik UI, `imageUrl` → `imageUrls` migrasyonu |
+| `useProducts` | Firestore CRUD, `imageUrl` → `imageUrls` migrasyonu. Yalnızca `updateProduct` optimistik (önce local state, sonra `updateDoc`); ekleme/silme `onSnapshot`'ın state'i güncellemesine güvenir |
 | `useCategories` | localStorage okuma/yazma (300ms debounce), kategori/alt kategori CRUD: `addCategory`, `renameCategory`, `deleteCategory`, `addSubcategory`, `renameSubcategory`, `deleteSubcategory` |
 | `useGenerate` | Tekli (`generateOne`) ve toplu (`generateBatch`) üretim, `cancelRef` ile iptal |
 
@@ -72,7 +72,7 @@ Diğer Firebase config değerleri (`projectId: tk-store-icerik`, appId, authDoma
 
 ### CSV (`src/lib/csv.ts`)
 
-- **Import** (`parseCSV`): başlıklar `kod, kategori, alt_kategori, ad, görsel_url`. Kategori/alt kategori adı Firestore id'ye çevrilir. Sadece `,` ile split — tırnaklı/virgüllü değer desteği yok.
+- **Import** (`parseCSV`): başlıklar `kod, kategori, alt_kategori, ad, görsel_url`. Kategori/alt kategori adı (büyük/küçük harf duyarsız) mevcut kategori id'sine çevrilir; eşleşmezse boş kalır. Satır başına tek görsel; `extraInfo`/`techSpecs` import edilmez. Sadece `,` ile split — tırnaklı/virgüllü değer desteği yok.
 - **Export** (`exportCSV`): BOM'lu UTF-8, tüm alanlar tırnak içinde, çoklu görsel `;` ile birleşik.
 
 ### UI Layout ve Component Ağacı
@@ -109,4 +109,4 @@ Tailwind kullanılıyor. Marka renkleri `tailwind.config.js` `theme.extend.color
 
 ### Ürün Durumu
 
-`Product.status`: `pending` → `generating` → `done` | `error`. Üretim hatası ürünü `error`'a çeker; toplu üretim `error` ürünlerini tekrar dener.
+`Product.status`: `pending` → `generating` → `done` | `error`. Üretim hatası ürünü `error`'a çeker; toplu üretim `error` ürünlerini tekrar dener. Hata mesajı ürüne kaydedilmez, sadece `console.error`'a yazılır. `generating` durumu Firestore'a da yazıldığından üretim sırasında sekme kapanırsa ürün `generating`'de takılı kalır ve toplu üretim onu hedeflemez (elle tekli üretim gerekir).
