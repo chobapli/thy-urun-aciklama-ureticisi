@@ -33,7 +33,7 @@ Diğer Firebase config değerleri (`projectId: tk-store-icerik`, appId, authDoma
 
 ### Veri Akışı
 
-- **Ürünler** → Firestore `products` koleksiyonu (gerçek zamanlı `onSnapshot`, `createdAt` sıralı). Eski belgelerde tekil `imageUrl` alanı varsa `useProducts` bunu `imageUrls: [imageUrl]` dizisine migrate eder.
+- **Ürünler** → Firestore `products` koleksiyonu (gerçek zamanlı `onSnapshot`, `createdAt` azalan — en yeni en üstte). Eski belgelerde tekil `imageUrl` alanı varsa `useProducts` bunu `imageUrls: [imageUrl]` dizisine migrate eder.
 - **Kategoriler** → `localStorage` (`categories` anahtarı), `DEFAULT_CATS` varsayılanı ile (`src/constants.ts`). Varsayılan ID'ler `cat-1` / `sub-1-1` biçiminde; sonradan eklenenler `cat-XXXXXXX` / `sub-XXXXXXX` (`uid()` ile). **Önemli:** Ürünler Firestore'da `catId`/`subId` ile kategoriye referans verir ama kategoriler tarayıcıya özeldir — başka tarayıcıda/cihazda özel kategoriler bulunmaz ve ad çözümlemesi `'Genel'`e (üretimde) ya da boş stringe (CSV export) düşer.
 - **Görseller** → Firebase Storage (`products/` yolu), base64 değil. Yüklemede public URL alınır.
 - **Açıklama üretimi** → Anthropic API doğrudan tarayıcıdan (`dangerouslyAllowBrowser: true`).

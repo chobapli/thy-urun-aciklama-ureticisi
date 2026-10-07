@@ -19,9 +19,9 @@ export function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Firestore'dan gerçek zamanlı dinle
+  // Firestore'dan gerçek zamanlı dinle — en yeni ürünler en üstte
   useEffect(() => {
-    const q = query(collection(db, COL), orderBy('createdAt', 'asc'));
+    const q = query(collection(db, COL), orderBy('createdAt', 'desc'));
     const unsub = onSnapshot(q, (snap) => {
       setProducts(
         snap.docs.map((d) => {
