@@ -63,6 +63,7 @@ Diğer Firebase config değerleri (`projectId: tk-store-icerik`, appId, authDoma
 - `extraInfo` → "Extra context" satırı; `techSpecs` → "Technical Specifications" satırı (metne doğal işlenir, liste yapılmaz)
 - `clean()` lone surrogate'ları temizler (JSON UTF-8 kırılmasını önler) — tüm string girdilere uygulanır
 - Yanıt `{"tr": "...", "en": "..."}`; `JSON.parse` başarısızsa regex fallback, o da olmazsa hata
+- `Anthropic.APIError` yakalanıp `Anthropic <status>: <API mesajı>` biçiminde yeni `Error` olarak fırlatılır (400 teşhisi için gerçek mesaj `console.error`'da görünür)
 - Türkçe metinde marka "Türk Hava Yolları", İngilizce'de "Turkish Airlines" (system prompt uygular)
 
 ### İsimlendirme Tutarsızlıkları
